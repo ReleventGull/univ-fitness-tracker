@@ -27,6 +27,12 @@ async function createTables() {
     name VARCHAR(255) UNIQUE NOT NULL,
     goal TEXT NOT NULL
   );
+  CREATE TABLE routineActivities ( 
+    id SERIAL PRIMARY KEY, 
+    "routineId"	INTEGER	REFERENCES routines (Id),
+    "activityId"	INTEGER	REFERENCES activities (Id),
+    duration	INTEGER UNIQUE, count	INTEGER UNIQUE,
+   ); 
   `);
 }
 
