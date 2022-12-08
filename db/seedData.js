@@ -20,7 +20,13 @@ async function createTables() {
     name VARCHAR(255) UNIQUE NOT NULL,
     description TEXT NOT NULL
   );
-  
+  CREATE TABLE routines (
+    id SERIAL PRIMARY KEY,
+    "creatorId" INTEGER REFERENCES users(Id),
+    "isPublic" BOOLEAN DEFAULT false,
+    name VARCHAR(255) UNIQUE NOT NULL,
+    goal TEXT NOT NULL
+  );
   `);
 }
 
