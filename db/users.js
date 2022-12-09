@@ -4,7 +4,18 @@ const client = require("./client");
 
 // user functions
 async function createUser({ username, password }) {
-  
+  try {
+  const {rows: users} = await client.query(`
+  INSERT INTO users (name, password)
+  VALUES ($1, $2)
+  RETURNING *;
+  `, [username, password])
+  console.log(users)
+  return users
+  }catch(error) {
+    console.log("There was an error creating users....")
+  }
+
 }
 
 async function getUser({ username, password }) {
