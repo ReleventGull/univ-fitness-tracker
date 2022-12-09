@@ -3,8 +3,22 @@
 const client = require("./client");
 
 async function dropTables() {
-  console.log("Dropping All Tables...");
-  // drop all tables, in the correct order
+  try {
+    console.log("Starting to drop tables...");
+
+    // have to make sure to drop in correct order
+    await client.query(`
+      DROP TABLE IF EXISTS routineActivities;
+      DROP TABLE IF EXISTS routines;
+      DROP TABLE IF EXISTS posts;
+      DROP TABLE IF EXISTS users;
+    `);
+
+    console.log("Finished dropping tables!");
+  } catch (error) {
+    console.error("Error dropping tables!");
+    throw error;
+  }
 }
 
 async function createTables() {
