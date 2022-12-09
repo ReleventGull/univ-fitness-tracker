@@ -6,13 +6,14 @@ const client = require("./client");
 // user functions
 async function createUser({ username, password }) {
   try {
-  const {rows: users} = await client.query(`
-  INSERT INTO users (name, password)
+  const {rows: [user]} = await client.query(`
+  INSERT INTO users (username, password)
   VALUES ($1, $2)
   RETURNING *;
   `, [username, password])
-  console.log(users)
-  return users
+  console.log('Created User', user)
+  delete user.password
+  return user
   }catch(error) {
     console.log("There was an error creating users....")
   }
@@ -25,18 +26,20 @@ async function getUser({ username, password }) {
     const { rows: [ user ] } = await client.query(`
       SELECT *
       FROM users
-      WHERE username=$1
+      WHERE username=$1;
     `, [username]);
 
     if (!user) {
       throw new Error("Username incorrect, please try again.");
     }
 
-    if (user.password != password) {
+    if (user.password !== password) {
      throw new Error("Password incorrect, please try again.");
-    }
-
-    return "User does not exist";
+    } 
+    
+    delete user.password
+    return user
+    
   } catch (error) {
     throw error;
   }
@@ -46,10 +49,10 @@ async function getUser({ username, password }) {
 async function getUserById(userId) {
   try {
     const { rows: [ user ] } = await client.query(`
-      SELECT id, username,
+      SELECT id, username
       FROM users
-      WHERE id=${ userId }
-    `);
+      WHERE id=$1;
+    `, [userId]);
 
     if (!user) {
       return null
