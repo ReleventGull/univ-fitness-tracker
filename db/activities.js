@@ -20,7 +20,7 @@ async function getActivityByName(name) {
     `, [name])
     //return await Promise.all(activitiesIds.map(
     //  activities => getActivityById(activity.id)));
-   return activities 
+   return activitiesIds 
 } catch (error) {
   throw error;
 }
