@@ -38,6 +38,7 @@ async function createActivity({ name, description }) {
     return activities;
   } catch (error) {
     console.log("An error occured while creating activities")
+    throw error;
   }
 }
 
