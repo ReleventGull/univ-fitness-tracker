@@ -10,7 +10,7 @@ async function dropTables() {
     await client.query(`
       DROP TABLE IF EXISTS routineActivities;
       DROP TABLE IF EXISTS routines;
-      DROP TABLE IF EXISTS posts;
+      DROP TABLE IF EXISTS activities;
       DROP TABLE IF EXISTS users;
     `);
 
