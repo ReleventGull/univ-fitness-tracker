@@ -1,3 +1,4 @@
+const { de } = require("faker/lib/locales");
 const id = require("faker/lib/locales/id_ID");
 const client = require("./client");
 
@@ -19,8 +20,8 @@ async function getActivityById(id) {
       rows: [activities],
     } = await client.query(
       `
-        SELECT id, name, description,
-        FROM activities,
+        SELECT *
+        FROM activities
         WHERE id=$1;
       `,
       [id]
@@ -98,7 +99,25 @@ async function createActivity({ name, description }) {
 // don't try to update the id
 // do update the name and description
 // return the updated activity
-async function updateActivity({ id, ...fields }) {}
+async function updateActivity({ id, ...fields }) {
+
+  const descArray = Object.keys(fields)
+  let beforeString = descArray.map((key,index) => `${key}=$${index+1}`)
+  let [setString] = beforeString
+  
+  try {
+    const {rows: [activity] } = await client.query(`
+    UPDATE activities
+    SET ${setString}
+    WHERE id=$2
+    RETURNING *;
+    `, [...Object.values(fields), id])
+    return activity
+  }
+  catch(error) {
+    throw error
+  }
+}
 
 module.exports = {
   getAllActivities,
