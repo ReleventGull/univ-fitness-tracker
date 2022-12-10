@@ -21,13 +21,14 @@ async function getActivityById(id) {
 async function getActivityByName(name) {
   console.log("Pulling activity by name")
   try{
-    const { rows: activitiesIds } = await client.query(`
-    SELECT id, name, description
+    const { rows: [activitiesIds] } = await client.query(`
+    SELECT *
     FROM activities
-    WHERE id=$1
+    WHERE name=$1;
     `, [name])
     //return await Promise.all(activitiesIds.map(
     //  activities => getActivityById(activity.id)));
+    console.log("Act here lmao", activitiesIds)
    return activitiesIds 
 } catch (error) {
   throw error;
