@@ -21,8 +21,9 @@ async function attachActivitiesToRoutines(routines) {
       FROM activities;
     `);
     return activities;
-  } catch {
+  } catch(error) {
     console.log("An error occured while attaching routines to activities")
+    throw error
   }
 }
 
