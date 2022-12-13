@@ -11,7 +11,7 @@ async function createUser({ username, password }) {
   VALUES ($1, $2)
   RETURNING *;
   `, [username, password])
-  console.log('Created User', user)
+
   delete user.password
   return user
   }catch(error) {
