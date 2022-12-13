@@ -8,7 +8,7 @@ async function dropTables() {
 
     // have to make sure to drop in correct order
     await client.query(`
-      DROP TABLE IF EXISTS routineActivities;
+      DROP TABLE IF EXISTS routine_activities;
       DROP TABLE IF EXISTS routines;
       DROP TABLE IF EXISTS activities;
       DROP TABLE IF EXISTS users;
@@ -36,18 +36,18 @@ async function createTables() {
   );
   CREATE TABLE routines (
     id SERIAL PRIMARY KEY,
-    "creatorId" INTEGER REFERENCES users(Id),
+    "creatorId" INTEGER REFERENCES users(id),
     "isPublic" BOOLEAN DEFAULT false,
-    name VARCHAR(255) UNIQUE NOT NULL,
+    name varchar(255) UNIQUE NOT NULL,
     goal TEXT NOT NULL
   );
-  CREATE TABLE routineActivities ( 
+  CREATE TABLE routine_activities ( 
     id SERIAL PRIMARY KEY, 
-    "routineId"	INTEGER	REFERENCES routines (Id),
-    "activityId"	INTEGER	REFERENCES activities (Id),
+    "routineId"	INTEGER	REFERENCES routines(id),
+    "activityId"	INTEGER	REFERENCES activities(id),
     duration INTEGER, 
     count	INTEGER,
-    UNIQUE ("routineId", "activityId")
+    UNIQUE("routineId", "activityId")
   ); 
   `);
 }

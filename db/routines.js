@@ -1,7 +1,17 @@
 const client = require('./client');
 
 async function getRoutineById(id){
-  //Jaron
+ try {
+const {rows: [routine]} = await client.query(`
+SELECT * FROM routines
+WHERE id=${id}
+`)
+console.log('Routine by id', routine)
+return routine
+ } catch(error) {
+  console.log("There was an error getting the rouine by the id")
+  throw error
+ }
 }
 
 async function getRoutinesWithoutActivities(){
@@ -29,7 +39,19 @@ async function getPublicRoutinesByActivity({id}) {
 }
 
 async function createRoutine({creatorId, isPublic, name, goal}) {
-  //Jaron
+try {
+
+const {rows: [routine]} = await client.query(`
+INSERT INTO routines (name, goal, "creatorId", "isPublic")
+VALUES ($1, $2, $3, $4)
+RETURNING *;
+`, [name, goal, creatorId, isPublic])
+
+return routine
+}catch(error) {
+  console.log("There was an error creating a routine")
+  throw error
+}
 }
 
 async function updateRoutine({id, ...fields}) {
