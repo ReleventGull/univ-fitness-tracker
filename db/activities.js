@@ -1,4 +1,3 @@
-
 const id = require("faker/lib/locales/id_ID");
 const client = require("./client");
 
