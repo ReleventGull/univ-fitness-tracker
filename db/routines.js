@@ -26,6 +26,7 @@ async function getRoutinesWithoutActivities(){
     console.log("There was an error getting the routines without activities");
     throw error;
   }
+}
 
 async function getAllRoutines() {
   //Rae
