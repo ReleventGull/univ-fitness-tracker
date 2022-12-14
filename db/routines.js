@@ -29,6 +29,16 @@ async function getRoutinesWithoutActivities(){
 
 async function getAllRoutines() {
   //Rae
+  try {
+    console.log("Pulling all routines!")
+    const { rows: routines } = await client.query(`
+    SELECT * FROM routines;
+    `);
+    return routines;
+  } catch (error) {
+    console.log("There was an error pulling all routines.")
+    throw error;
+  }
 }
 
 async function getAllRoutinesByUser({username}) {
@@ -114,8 +124,25 @@ async function getAllPublicRoutines() {
 }
 
 async function getPublicRoutinesByActivity({id}) {
-  //Rae
+  //Rae 
+  console.log("Getting public routines by activity!")
+  try{
+    const { rows: [routines] } = await client.query(`
+    SELECT *
+    FROM routines
+    WHERE "isPublic"=${id}`, [id]);
+    if(!isPublic) {
+      return null;
+    }
+    activities.routines = await getRoutineById(id);
+    return routines;
+  }
+  catch(error){
+    console.log("There was an error getting public routines by activity.")
+    throw error;
+  }
 }
+
 
 async function createRoutine({creatorId, isPublic, name, goal}) {
 try {
