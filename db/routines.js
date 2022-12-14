@@ -4,9 +4,16 @@ async function getRoutineById(id){
  try {
 const {rows: [routine]} = await client.query(`
 SELECT * FROM routines
-WHERE id=${id}
+WHERE id=${id};
 `)
-console.log('Routine by id', routine)
+
+console.log('routine id', routine.id)
+const {rows: [routine_activity]} = await client.query(`
+SELECT * FROM routine_activities
+WHERE "routineId"=80;
+`)
+console.log('The routine activity here', routine_activity)
+
 return routine
  } catch(error) {
   console.log("There was an error getting the rouine by the id")
@@ -20,7 +27,7 @@ async function getRoutinesWithoutActivities(){
       SELECT *
       FROM routines;
     `);
-    console.log('Routines without activities', routines);
+    
     return routines;
   } catch(error) {
     console.log("There was an error getting the routines without activities");
@@ -66,7 +73,7 @@ async function getAllRoutinesByUser({username}) {
       
       
     )
-      console.log("routines", routines)
+     
     return routines;
   } catch (error) {
     console.log("There was an error getting routines by user")
@@ -96,7 +103,6 @@ async function getPublicRoutinesByUser({username}) {
       [user.id]
     );
 
-    console.log("routines", routines)
     return routines;
   } catch (error) {
     console.log("There was an error getting the public routines by user");
