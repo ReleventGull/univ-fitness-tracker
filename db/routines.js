@@ -15,22 +15,101 @@ return routine
 }
 
 async function getRoutinesWithoutActivities(){
-  //Kelan
-}
+  try {
+    const {rows: routines} = await client.query(`
+      SELECT *
+      FROM routines;
+    `);
+    console.log('Routines without activities', routines);
+    return routines;
+  } catch(error) {
+    console.log("There was an error getting the routines without activities");
+    throw error;
+  }
 
 async function getAllRoutines() {
   //Rae
 }
 
 async function getAllRoutinesByUser({username}) {
-  //Marty
+  try {
+    const {
+      rows: [user],
+    } = await client.query(
+      `
+      SELECT *
+      FROM users
+      WHERE username=$1;
+    `,
+      [username]
+    );
+
+    const {
+      rows: routines,
+    } = await client.query(
+      `
+      SELECT *
+      FROM routines
+      WHERE "creatorId"= ${user.id};
+      `
+      
+      
+    )
+      console.log("routines", routines)
+    return routines;
+  } catch (error) {
+    console.log("There was an error getting routines by user")
+    throw error;
+  }
 }
 
 async function getPublicRoutinesByUser({username}) {
-  //Kelan
+  try {
+    const {
+      rows: [user],
+    } = await client.query(`
+      SELECT *
+      FROM users
+      WHERE username=$1;
+    `,
+      [username]
+    );
+    
+    const {
+      rows: routines,
+    } = await client.query(`
+      SELECT *
+      FROM routines
+      WHERE "creatorId"=$1 AND "isPublic"=true;
+    `,
+      [user.id]
+    );
+
+    console.log("routines", routines)
+    return routines;
+  } catch (error) {
+    console.log("There was an error getting the public routines by user");
+    throw error;
+  }
 }
 
 async function getAllPublicRoutines() {
+  try {
+    const {
+      rows: routines,
+    } = await client.query(
+      `
+      SELECT *
+      FROM routines
+      WHERE "isPublic"=true;
+    `,
+      
+    );
+
+    return routines;
+  } catch (error) {
+    throw error;
+  }
   //Marty
 }
 
