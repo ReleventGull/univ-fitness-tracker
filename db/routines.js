@@ -26,6 +26,7 @@ async function getRoutinesWithoutActivities(){
     console.log("There was an error getting the routines without activities");
     throw error;
   }
+}
 
 async function getAllRoutines() {
   //Rae
@@ -146,13 +147,11 @@ async function getPublicRoutinesByActivity({id}) {
 
 async function createRoutine({creatorId, isPublic, name, goal}) {
 try {
-
 const {rows: [routine]} = await client.query(`
 INSERT INTO routines (name, goal, "creatorId", "isPublic")
 VALUES ($1, $2, $3, $4)
 RETURNING *;
 `, [name, goal, creatorId, isPublic])
-
 return routine
 }catch(error) {
   console.log("There was an error creating a routine")
