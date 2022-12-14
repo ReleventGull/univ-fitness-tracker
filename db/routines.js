@@ -48,7 +48,7 @@ async function getPublicRoutinesByUser({username}) {
     );
     
     const {
-      rows: [routines],
+      rows: routines,
     } = await client.query(`
       SELECT *
       FROM routines
