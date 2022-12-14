@@ -23,7 +23,35 @@ async function getAllRoutines() {
 }
 
 async function getAllRoutinesByUser({username}) {
-  //Marty
+  try {
+    const {
+      rows: [user],
+    } = await client.query(
+      `
+      SELECT *
+      FROM users
+      WHERE username=$1;
+    `,
+      [username]
+    );
+
+    const {
+      rows: routines,
+    } = await client.query(
+      `
+      SELECT *
+      FROM routines
+      WHERE "creatorId"= ${user.id};
+      `
+      
+      
+    )
+      console.log("routines", routines)
+    return routines;
+  } catch (error) {
+    console.log("There was an error getting routines by user")
+    throw error;
+  }
 }
 
 async function getPublicRoutinesByUser({username}) {
@@ -31,6 +59,22 @@ async function getPublicRoutinesByUser({username}) {
 }
 
 async function getAllPublicRoutines() {
+  try {
+    const {
+      rows: routines,
+    } = await client.query(
+      `
+      SELECT *
+      FROM routines
+      WHERE "isPublic"=true;
+    `,
+      
+    );
+
+    return routines;
+  } catch (error) {
+    throw error;
+  }
   //Marty
 }
 
