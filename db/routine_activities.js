@@ -86,6 +86,21 @@ async function destroyRoutineActivity(id) {
 }
 
 async function canEditRoutineActivity(routineActivityId, userId) {
+  try {
+    //Funciton isn't needed
+const {rows: [routine]} = await client.query(`
+SELECT * FROM routines
+WHERE id=${routineActivityId};
+`)
+if (routineActivityId == userId) {
+  return true
+}else {
+  return false
+}
+  }catch(error) {
+    console.log("Ther was an error validating canEdiRoutineActiviy")
+    throw error
+  }
 }
 
 module.exports = {
