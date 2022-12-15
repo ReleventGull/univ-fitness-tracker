@@ -70,6 +70,19 @@ async function updateRoutineActivity ({id, ...fields}) {
 }
 
 async function destroyRoutineActivity(id) {
+  try {
+    const {rows: [deletedRoutine]} = await client.query(`
+    DELETE FROM routine_activities
+    WHERE id=${id}
+    RETURNING *;
+    `)
+    console.log("HERE", deletedRoutine)
+    return deletedRoutine;
+  }catch(error) {
+    console.log("There was an error deleting the routine activity")
+    console.log(error)
+    throw error
+  }
 }
 
 async function canEditRoutineActivity(routineActivityId, userId) {
