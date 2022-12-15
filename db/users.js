@@ -1,16 +1,19 @@
 /* eslint-disable no-useless-catch */
 const client = require("./client");
-
+const bcrypt = require('bcrypt')
+const SALT_COUNT = 10
 // database functions
 
 // user functions
 async function createUser({ username, password }) {
+ const hashPassword = await bcrypt.hash(password, SALT_COUNT)
+
   try {
   const {rows: [user]} = await client.query(`
   INSERT INTO users (username, password)
   VALUES ($1, $2)
   RETURNING *;
-  `, [username, password])
+  `, [username, hashPassword])
 
   delete user.password
   return user
@@ -28,15 +31,14 @@ async function getUser({ username, password }) {
       FROM users
       WHERE username=$1;
     `, [username]);
-    console.log(user.password !== password)
-  
+   
+   
+    let passwordsMatch = await bcrypt.compare(password, user.password)
 
     if (!user) {
       throw new Error("Username incorrect, please try again.");
     }
-    
-    
-    if (user.password !== password) {
+    if (!passwordsMatch) {
       return false
      }
      else {
