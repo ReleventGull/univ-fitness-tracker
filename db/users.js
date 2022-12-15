@@ -28,17 +28,23 @@ async function getUser({ username, password }) {
       FROM users
       WHERE username=$1;
     `, [username]);
+    console.log(user.password !== password)
+  
 
     if (!user) {
       throw new Error("Username incorrect, please try again.");
     }
-
-    if (user.password !== password) {
-     throw new Error("Password incorrect, please try again.");
-    } 
     
-    delete user.password
-    return user
+    
+    if (user.password !== password) {
+      return false
+     }
+     else {
+      delete user.password
+      return user
+     }
+
+  
     
   } catch (error) {
     throw error;
