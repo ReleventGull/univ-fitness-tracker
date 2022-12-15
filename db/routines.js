@@ -10,7 +10,7 @@ WHERE id=${id};
 console.log('routine id', routine.id)
 const {rows: [routine_activity]} = await client.query(`
 SELECT * FROM routine_activities
-WHERE "routineId"=80;
+WHERE "routineId"=${routine.id};
 `)
 console.log('The routine activity here', routine_activity)
 
