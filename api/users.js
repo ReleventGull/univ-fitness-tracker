@@ -19,6 +19,18 @@ router.get('/me', async (req, res, next) => {
         res.send({ users })
     } catch (error){
         next(error);
+
+// GET /api/users/:username/routines
+
+router.get('/:username/routines', async(req, res, next) => {
+    try {
+        const {username} = req.params
+        console.log("BRUH", username)
+        const publicRoutines = await getPublicRoutinesByUser({username: username})
+        res.send(publicRoutines)
+    }catch(error) {
+        next(error)
+
     }
 })
 
