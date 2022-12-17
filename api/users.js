@@ -8,6 +8,7 @@ const {
     createUser,
     getUserByUsername,
     getUserById,
+    getPublicRoutinesByUser
 } = require('../db');
 
 // POST /api/users/login
@@ -38,5 +39,16 @@ router.post('/login', async (req, res, next) => {
 // GET /api/users/me
 
 // GET /api/users/:username/routines
+
+router.get('/:username/routines', async(req, res, next) => {
+    try {
+        const {username} = req.params
+        console.log("BRUH", username)
+        const publicRoutines = await getPublicRoutinesByUser(username)
+        res.send(publicRoutines)
+    }catch(error) {
+        next(error)
+    }
+})
 
 module.exports = router;
