@@ -60,16 +60,34 @@ async function getActivityByName(name) {
 
 // select and return an array of all activities
 async function attachActivitiesToRoutines(routines) {
+
   try {
     const {
-      rows: [activities],
+      rows: activities,
     } = await client.query(`
-      SELECT *
-      FROM activities;
+      SELECT activities.*, routine_activities.id AS "routineActivityId", routine_activities."routineId", routine_activities.duration, routine_activities.count
+      FROM activities
+      INNER JOIN routine_activities ON activities.id = routine_activities."activityId";
     `);
-    return activities;
+   
+    
+    if(Array.isArray(routines)) {
+      for (let i = 0; i < routines.length; i++) {
+        routines[i]['activities'] = []
+      }
+
+      for (let j = 0; j < routines.length; j++) {
+          for(let m = 0; m < activities.length; m++) {
+            if (routines[j].id == activities[m].routineId) {
+              routines[j]['activities'].push(activities[m])
+            }
+          }
+      }
+    }
+    return routines
   } catch (error) {
     console.log("An error occured while attaching routines to activities");
+    console.log(error)
     throw error;
   }
 }

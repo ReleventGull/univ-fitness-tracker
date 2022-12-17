@@ -89,16 +89,22 @@ async function canEditRoutineActivity(routineActivityId, userId) {
   try {
     //Funciton isn't needed
 const {rows: [routine]} = await client.query(`
-SELECT * FROM routines
-WHERE id=${routineActivityId};
-`)
-if (routineActivityId == userId) {
+SELECT routine_activities.*, routines."creatorId"
+FROM 
+routine_activities
+JOIN routines
+ON routine_activities."routineId"=routines.id
+WHERE routine_activities.id=$1;
+`, [routineActivityId])
+console.log(routine)
+if (routine.creatorId == userId) {
   return true
 }else {
   return false
 }
   }catch(error) {
-    console.log("Ther was an error validating canEdiRoutineActiviy")
+    console.log("There was an error validating canEdiRoutineActiviy")
+    console.log(error)
     throw error
   }
 }
