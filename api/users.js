@@ -15,13 +15,13 @@ const {
 router.post('/login', async (req, res, next) => {
     try {
         const { username, password } = req.body;
-        const user = await getUser({ username, password });
+        const user = await getUser({ username: username, password:password});
 
         if (user) {
             const token = jwt.sign({ id: user.id, username }, process.env.JWT_SECRET, {
                 expiresIn: '1w',
             });
-            res.send({ message: "You're logged in!", token });
+            res.send({ message: "You're logged in!", user:user, token:token });
         } else {
             next({
                 name: 'Incorrect User Credentials',
