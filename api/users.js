@@ -9,7 +9,8 @@ const router = express.Router();
 // GET /api/users/me
 
 router.get('/me', async (req, res, next) => {
-
+    //test
+    
     //const getUsers = await getUserByUsername()
     try{
         const {users} = req.params
