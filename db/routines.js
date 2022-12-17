@@ -1,6 +1,6 @@
 const client = require('./client');
 const {attachActivitiesToRoutines} = require('./activities');
-const { set } = require('../app');
+
 
 async function getRoutineById(id){
  try {
