@@ -10,12 +10,15 @@ router.get('/:activityId/routines', async(req, res, next) => {
     try {
         const {activityId} = req.params
         console.log("AHHHH", activityId)
-        const selectedActivity = getActivityById(activityId)
-        if (!selectedActivity) {
-            next(error);
-        }
         const publicRoutinesByActivity = await getPublicRoutinesByActivity({id: activityId})
-    
+        console.log('Result', publicRoutinesByActivity)
+        if(!publicRoutinesByActivity) {
+            next({
+                message,
+                    name:'InvalidExpression',
+                    error: 'That activity does not exists'
+            })
+        }
         console.log("WTF", publicRoutinesByActivity)
         res.send(publicRoutinesByActivity)
     }catch(error) {
