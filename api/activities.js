@@ -14,7 +14,7 @@ router.get('/:activityId/routines', async(req, res, next) => {
         console.log('Result', publicRoutinesByActivity)
         if(!publicRoutinesByActivity) {
             next({
-                message,
+                message: 'Activity not found',
                     name:'InvalidExpression',
                     error: 'That activity does not exists'
             })
