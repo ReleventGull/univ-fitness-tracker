@@ -26,4 +26,24 @@ app.use('/api', router)
 
 
 
+router.use((req, res, next) => {
+    res.status(401)
+    res.send('Denied Access')
+})
+
+router.use((req, res, next) => {
+    res.status(404)
+    res.send('Page no found')
+})
+
+router.use((error, req, res, next) => {
+    res.status(500)
+    res.send({
+        name: error.name,
+        message: error.message
+    })
+})
+
+
+
 module.exports = app;
