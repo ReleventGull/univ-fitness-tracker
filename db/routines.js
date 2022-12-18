@@ -150,6 +150,9 @@ async function getPublicRoutinesByActivity({id}) {
     FROM routine_activities
     WHERE "activityId"=$1;`, [id]);
   
+    if(!routine_activity) {
+      return undefined
+    }
   const {rows: routines} = await client.query(`
   SELECT routines.*, users.username AS "creatorName"
   FROM

@@ -50,7 +50,10 @@ router.post('/register', async (req, res, next) => {
                 message: `A user by that username already exists.`,
               });
         }else if (password.length < 8) {
-            next('Password Too Short!')
+            next({
+                error: "InvalidCredentials",
+                name: 'PasswordError',
+            })
         }
         const user = await createUser({username: username, password: password})
         const token = jwt.sign({id: user.id, username: username}, JWT_SECRET, {expiresIn: '1w'})
