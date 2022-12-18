@@ -3,6 +3,7 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = process.env;
 
+
 const { 
     getUser,
     createUser,
@@ -18,7 +19,7 @@ router.post('/login', async (req, res, next) => {
         const user = await getUser({ username: username, password:password});
 
         if (user) {
-            const token = jwt.sign({ id: user.id, username }, process.env.JWT_SECRET, {
+            const token = jwt.sign({ id: user.id, username: username }, process.env.JWT_SECRET, {
                 expiresIn: '1w',
             });
             res.send({ message: "You're logged in!", user:user, token:token });
@@ -52,7 +53,7 @@ router.post('/register', async (req, res, next) => {
             next('Password Too Short!')
         }
         const user = await createUser({username: username, password: password})
-        const token = jwt.sign(user, JWT_SECRET, {expiresIn: '1w'})
+        const token = jwt.sign({id: user.id, username: username}, JWT_SECRET, {expiresIn: '1w'})
         console.log('new user here', user)
         res.send({message: "Success", token: token, user: user })
     }catch(error) {
@@ -64,14 +65,24 @@ router.post('/register', async (req, res, next) => {
 
 
 router.get('/me', async (req, res, next) => {
-    //test
-    //const getUsers = await getUserByUsername()
     try{
-        const {users} = req.params;
-        console.log("heh", users);
-        const gettingUser = await getUserByUsername({users})
+        const auth = req.header('Authorization')
+
+        if(!auth) {
+            console.log("There is one that failed")
+            res.status(401)
+     next({
+        name:'AuthoizationError',
+        message:'You are not authorized'
+     })
+        }
+        const token = auth.slice(7)
+        console.log('Token is here', token)
+        const {username} = jwt.verify(token, JWT_SECRET)
+        const gettingUser = await getUserByUsername(username)
+        console.log('The user is here', gettingUser)
         res.send(gettingUser)
-    } catch (error){
+    } catch(error){
         next(error);
         //descontsruct token & validate token
     }
@@ -89,5 +100,8 @@ router.get('/:username/routines', async(req, res, next) => {
         next(error)
     }
 })
+
+
+
 
 module.exports = router;
