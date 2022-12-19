@@ -75,6 +75,7 @@ async function getUserById(userId) {
 }
 
 async function getUserByUsername(userName) {
+  console.log(userName)
   try {
     const {
       rows: [user],
@@ -86,7 +87,7 @@ async function getUserByUsername(userName) {
     `,
       [userName]
     );
-
+      console.log("USER IS HERE", user)
     return user;
   } catch (error) {
     throw error;

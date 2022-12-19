@@ -1,7 +1,8 @@
 const express = require('express');
-const id = require('faker/lib/locales/id_ID');
+const jwt = require('jsonwebtoken');
+const { JWT_SECRET } = process.env;
 const router = express.Router();
-const {getAllActivities, getActivityById, getPublicRoutinesByActivity, getUser, updateActivity} = require('../db')
+const {getAllActivities, getPublicRoutinesByActivity, getActivityById, updateActivity, createActivity, getActivityByName} = require('../db')
 
 
 // GET /api/activities/:activityId/routines
@@ -14,9 +15,8 @@ router.get('/:activityId/routines', async(req, res, next) => {
         console.log('Result', publicRoutinesByActivity)
         if(!publicRoutinesByActivity) {
             next({
-                message: 'Activity not found',
-                    name:'InvalidExpression',
-                    error: 'That activity does not exists'
+                    name:`Activity ${activityId} not found`,
+                    message: `Activity ${activityId} not found`
             })
         }
         console.log("WTF", publicRoutinesByActivity)
@@ -43,21 +43,33 @@ router.get('/', async(req, res, next) => {
 router.post('/', async (req, res, next) => {
     try{
         const auth = req.header('Authorization')
-
+        console.log("AUTHOR", auth)
         if(!auth) {
-            console.log("There is one that failed")
             res.status(401)
      next({
         name:'AuthoizationError',
         message:'You are not authorized'
      })
-        }
+}
         const token = auth.slice(7)
-        console.log('Token is here', token)
         const {username} = jwt.verify(token, JWT_SECRET)
-        const gettingUser = await getUserByUsername(username)
-        console.log('The user is here', gettingUser)
-        res.send(gettingUser)
+        if (!username) {
+            next({
+                name: "You are not logged in",
+                message: "You are not logged in"
+            })
+        }
+        const {name, description} = req.body
+        const existingActivity = await getActivityByName(name)
+        if(existingActivity) {
+            next({
+                name:  `An activity with name ${name} already exists`,
+                message:  `An activity with name ${name} already exists`
+            })
+        }
+        
+        const newActivity = await createActivity({name: name, description: description})
+        res.send(newActivity)
     } catch(error){
         next(error);
         
@@ -66,35 +78,53 @@ router.post('/', async (req, res, next) => {
 
 // PATCH /api/activities/:activityId
 
-router.patch("/:activityId", getUser, async (req, res, next) => {
-    const { activityId } = req.params;
-    const { name, description } = req.body;
-  
-    const updateFields = {};
-  
-    
-
-  
-    if (name) {
-      updateFields.name = name;
-    }
-  
-    if (description) {
-      updateFields.description = description;
-    }
-  
+router.patch("/:activityId", async (req, res, next) => {
     try {
-      const originalActivity = await getActivityById(activityId);
-  
-      if (originalActivity.user.id === req.user.id) {
-        const updatedActivity = await updateActivity(activityId, updateFields);
-        res.send({ allActivities: updatedActivity });
-      } else {
+        const auth = req.header('Authorization')
+        if(!auth) {
+            res.status(401)
+     next({
+        name:'AuthoizationError',
+        message:'You are not authorized'
+     })
+    }
+        const token = auth.slice(7)
+        console.log("TOKEN HERE", token)
+        const {username} = jwt.verify(token, JWT_SECRET)
+        if (!username) {
+            next({
+                name: "You are not logged in",
+                message: "You are not logged in"
+            })
+        }
+    
+    const {activityId} = req.params    
+    const checkIfExist = await getActivityById(activityId)
+    console.log('EXISTS BY ID', checkIfExist)
+    
+    if(!checkIfExist) {
         next({
-          name: "UnauthorizedUserError",
-          message: "You cannot update an activity that is not yours",
-        });
-      }
+               name:  `Activity ${activityId} not found`,
+              message:  `Activity ${activityId} not found`
+          })
+     }
+        
+    const {name, description} = req.body
+    
+    const existingActivity = await getActivityByName(name)
+    
+    if(existingActivity) {
+        next({
+            name:  `An activity with name ${name} already exists`,
+            message:  `An activity with name ${name} already exists`
+        })
+    }
+
+    let updateFields = {}
+    updateFields['name'] = name
+    updateFields['description'] = description
+    const updatedActivity = await updateActivity({id: activityId, ...updateFields})
+    res.send(updatedActivity)
     } catch ({ name, message }) {
       next({ name, message });
     }
