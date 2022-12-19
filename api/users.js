@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = process.env;
-
+const bcrypt = require('bcrypt');
+const SALT_COUNT = 10
 
 const { 
     getUser,
@@ -16,17 +17,18 @@ const {
 router.post('/login', async (req, res, next) => {
     try {
         const { username, password } = req.body;
+        
         const user = await getUser({ username: username, password:password});
 
         if (user) {
             const token = jwt.sign({ id: user.id, username: username }, process.env.JWT_SECRET, {
                 expiresIn: '1w',
             });
-            res.send({ message: "You're logged in!", user:user, token:token });
+            res.send({ message: "you're logged in!", user:user, token:token });
         } else {
             next({
                 name: 'Incorrect User Credentials',
-                message: 'Username or password is incorrect',
+                message: `User ${username} does not exist`,
             });
         }
     } catch (error) {
@@ -39,20 +41,18 @@ router.post('/login', async (req, res, next) => {
 
 router.post('/register', async (req, res, next) => {
     try {
-        console.log('The body', req.body)
         const {username, password} = req.body
-        const existingUser = await getUserByUsername(username)
-        console.log("Exising user", existingUser)
-        if(existingUser) {
+        const _user = await getUserByUsername(username)
+        if(_user) {
            next({
-                error: res.body,
-                name: "IncorrectCredentialsError",
-                message: `A user by that username already exists.`,
+                name: `User ${username} is already taken.`, 
+                message: `User ${username} is already taken.`,
               });
-        }else if (password.length < 8) {
+        }
+        if(password.length < 8) {
             next({
-                error: "InvalidCredentials",
-                name: 'PasswordError',
+                name:`Password Too Short!`,
+                message:`Password Too Short!`
             })
         }
         const user = await createUser({username: username, password: password})
@@ -72,12 +72,11 @@ router.get('/me', async (req, res, next) => {
         const auth = req.header('Authorization')
 
         if(!auth) {
-            console.log("There is one that failed")
-            res.status(401)
-     next({
-        name:'AuthoizationError',
-        message:'You are not authorized'
-     })
+        res.status(401)
+        next({
+        name:"You must be logged in to perform this action",
+        message:"You must be logged in to perform this action"
+         })
         }
         const token = auth.slice(7)
         console.log('Token is here', token)

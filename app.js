@@ -25,20 +25,14 @@ app.use('/api', router)
 
 
 
-
-router.use((req, res, next) => {
+app.use((req,res,next) => {
     res.status(401)
-    res.send('Denied Access')
+    res.send("You must be logged in to perform this action")
 })
-
-router.use((req, res, next) => {
-    res.status(404)
-    res.send('Page no found')
-})
-
-router.use((error, req, res, next) => {
+app.use((error, req, res, next) => {
     res.status(500)
     res.send({
+        error: error.message,
         name: error.name,
         message: error.message
     })
