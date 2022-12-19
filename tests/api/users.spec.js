@@ -124,7 +124,7 @@ describe("/api/users", () => {
         username: faker.internet.userName(),
         password: faker.internet.password(7),
       }
-
+      
       const response = await request(app)
         .post("/api/users/register")
         .send(newUserShortPassword)
