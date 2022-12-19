@@ -1,10 +1,27 @@
 const express = require('express');
 const router = express.Router();
-const { getRoutineActivityById, updateRoutineActivity, destroyRoutineActivity } = require('../db');
-const { requireUser } = require('./missinguser');
+const jwt = require('jsonwebtoken');
+const { JWT_SECRET } = process.env
+const { updateRoutineActivity, getRoutineActivityById, destroyRoutineActivity, getUserByUsername, getRoutineById} = require('../db');
+;
+// const { requireUser } = require('./missinguser');
 
 
-router.patch('/:routineActivityId', requireUser, async (req, res, next) => {
+router.patch('/:routineActivityId', async (req, res, next) => {
+  try {
+  // const auth = req.header('Authorization')
+  // if(!auth) {
+  //   res.status(401)
+  //   next({
+  //   name:"You must be logged in to perform this action",
+  //   message:"You must be logged in to perform this action"
+  //    })
+  //   }
+  //   const token = auth.slice(7)
+  //   console.log('Token is here', token)
+  //   const {username} = jwt.verify(token, JWT_SECRET) 
+  //   const _user = await getUserByUsername(username)
+  //  console.log('USERBRO', _user)
 
     const { routineActivityId } = req.params;
     //const { title, content, tags } = req.body;
@@ -20,18 +37,20 @@ router.patch('/:routineActivityId', requireUser, async (req, res, next) => {
       updateCount.duration = duration;
     }
   
-    try {
+    
       const ogRoutineActivity = await getRoutineActivityById(routineActivityId);
-  
-      if (ogRoutineActivity.routineId.activityId.id === req.user.id) {
-        const updateRoutineActivity = await updateRoutineActivity(routineActivityId, updateCount);
-        res.send({ routine_activities: updateRoutineActivity })
-      } else {
+      console.log(ogRoutineActivity)
+      const routine = await getRoutineById(ogRoutineActivity.routineId)
+      if (_user.id != routine.creatorId) {
         next({
-          name: 'UnauthorizedUserError',
-          message: 'You cannot update routine activities that are not yours'
+          name: `User ${username} is not allowed to update ${routine.name}`,
+          message: `User ${username} is not allowed to update ${routine.name}`
         })
       }
+        console.log("I'm RIGHT HERE")
+        const bruh = await updateRoutineActivity()
+        console.log("bruh", bruh)
+      console.log("I'm RIGHT HERE")
     } catch ({ name, message }) {
       next({ name, message });
     }
@@ -41,28 +60,41 @@ router.patch('/:routineActivityId', requireUser, async (req, res, next) => {
 // DELETE /api/routine_activities/:routineActivityId
 
 
-router.delete('/:routineActivityId', requireUser, async (req, res, next) => {
+router.delete('/:routineActivityId', async (req, res, next) => {
     try {
-      const gettingRA = await getRoutineActivityById(req.params.routineActivityId);
-  
-      if (gettingRA && gettingRA.routineId.activityId.id === req.user.id) {
-        const updateRoutineActivity = await destroyRoutineActivity(gettingRA.id, { active: false });
-  
-        res.send({ routine_activities: updateRoutineActivity });
-      } else {
-        // if there was a post, throw UnauthorizedUserError, otherwise throw PostNotFoundError
-        next( gettingRA ? { 
-          name: "UnauthorizedUserError",
-          message: "You cannot delete routine activites that are not yours"
-        } : {
-          name: "RoutineActivitiesNotFoundError",
-          message: "That routine activity does not exist"
-        });
-      }
-  
-    } catch ({ name, message }) {
-      next({ name, message })
+      const auth = req.header('Authorization')
+  if(!auth) {
+    res.status(401)
+    next({
+    name:"You must be logged in to perform this action",
+    message:"You must be logged in to perform this action"
+     })
     }
+    const token = auth.slice(7)
+   
+    const {username} = jwt.verify(token, JWT_SECRET) 
+    const _user = await getUserByUsername(username)
+      
+    const { routineActivityId } = req.params;
+    const gettingRA = await getRoutineActivityById(routineActivityId);
+     
+    const routine = await getRoutineById(gettingRA.routineId)
+     
+    if(_user.id != routine.creatorId) {
+       
+      next({
+        name: `User ${username} is not allowed to delete ${routine.name}`,
+         message: `User ${username} is not allowed to delete ${routine.name}`
+        })
+     }
+     if(_user.id == routine.creatorId) {
+        
+      const destroyedRoutine = await destroyRoutineActivity(routineActivityId)
+      res.send(destroyedRoutine)
+      }
+  } catch ({ name, message }) {
+    next({ name, message })
+   }
   });
 
 module.exports = router;

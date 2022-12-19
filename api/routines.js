@@ -66,7 +66,7 @@ router.delete('/routines/:routineId', async(req, res, next) => {
     }
 });
 
-// POST /api/routines/:routineId/activities
+// POST /api/routines/:routineId/activitie
 //NOTE - Attach a single activity to a routine. Prevent duplication on (routineId, activityId) pair.
 router.post('/routines/:routineId/activities', async(req, res, next) => {
     try {
