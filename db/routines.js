@@ -238,7 +238,7 @@ async function destroyRoutine(id) {
     WHERE id=$1
     RETURNING *;
     `,[id])
-    return destroyedRoutine;
+    return {routineActvitiy: destroyedRoutineActivities , routine: destroyedRoutine};
   }catch(error) {
     console.log("There was an error trying to destroy the routine")
     throw error

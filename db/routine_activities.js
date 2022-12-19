@@ -19,25 +19,28 @@ async function addActivityToRoutine({
   duration,
 }) {
     try {
+      console.log('in funciton', routineId)
       const {rows: [routine_activity]} = await client.query(`
       INSERT INTO routine_activities ("routineId", "activityId", count, duration)
       VALUES($1, $2, $3, $4) 
       RETURNING * ;
       `, [routineId, activityId, count, duration])
+    
       return routine_activity
     }catch(error) {
-      console.log("There was an erro adding Activity to Routine")
+      console.log("There was an error adding Activity to Routine")
+      console.log(error)
       throw error
     }
 }
 
 async function getRoutineActivitiesByRoutine({id}) {
 try {
-const {rows: routine_activities} = await client.query(`
+const {rows: [routine_activities]} = await client.query(`
 SELECT * FROM routine_activities
 WHERE "routineId"=${id}
 `)
-console.log(routine_activities)
+
 return routine_activities
 }catch(error) {
   throw error

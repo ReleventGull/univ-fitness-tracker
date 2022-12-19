@@ -9,7 +9,9 @@ const {
     updateRoutine,
     destroyRoutine,
     addActivityToRoutine,
-    getRoutineActivitiesByRoutine
+    getRoutineActivitiesByRoutine,
+    getRoutineActivityById,
+    destroyRoutineActivity
 } = require('../db')
 
 // GET /api/routines
@@ -95,8 +97,9 @@ router.delete('/:routineId', async(req, res, next) => {
         // returns a 403 when the user deletes a routine that isn't theirs
         const auth = req.header('Authorization')
         if(!auth) {
-            res.status(403)
+            
             next({
+                
                 name:'AuthorizationError',
                 message:'You are not authorized'
             })
@@ -109,15 +112,15 @@ router.delete('/:routineId', async(req, res, next) => {
         const routine = await getRoutineById(routineId)
 
         if(routine.creatorId !== id) {
-            res.status(403)
             next({
                 name:'AuthorizationError',
                 message:'You are not authorized'
             })
         }
-        const deletedRoutine = await destroyRoutine(routineId);
-        console.log("deletedRoutine", deletedRoutine);
-        res.send(deletedRoutine);
+   
+    const deletedRoutine = await destroyRoutine(routineId);
+
+    res.send(deletedRoutine);
     } catch(error) {
         console.log("There was an error deleting a routine.");
         next(error);
@@ -129,26 +132,33 @@ router.delete('/:routineId', async(req, res, next) => {
 // Prevent duplication on (routineId, activityId) pair.
 router.post('/:routineId/activities', async(req, res, next) => {
     try {
-        const {routineId} = req.params;
-        const existingRoutineActivities = await getRoutineActivitiesByRoutine(routineId);
-        console.log("routineId", routineId);
+ 
+      
 
         const {activityId, count, duration} = req.body;
-        console.log("activityId", activityId);
-
-        if (existingRoutineActivities.activityId == activityId) {
-            next({
-                name: `Activity ID ${activityId} already exists in Routine ID ${routineId}`,
-                message: `Activity ID ${activityId} already exists in Routine ID ${routineId}`
-            })
-        }
-        const newRoutineActivity = await addActivityToRoutine({
+        const {routineId} = req.params;
+        console.log('ROUTINE ID', routineId)
+        const routineActivitiyByRoutine = await getRoutineActivitiesByRoutine({id: routineId});
+        const routineActivityByActivitity = await getRoutineActivityById(activityId)
+        
+        
+        if (!routineActivitiyByRoutine && !routineActivityByActivitity) {
+            console.log('routineActivitiyByRoutine', routineActivitiyByRoutine)
+            const newRoutineActivity = await addActivityToRoutine({
             routineId: routineId, 
             activityId: activityId, 
             count: count, 
             duration: duration
         })
         res.send(newRoutineActivity);
+        
+    } else {
+            next({
+                name: `Activity ID ${activityId} already exists in Routine ID ${routineId}`,
+                message: `Activity ID ${activityId} already exists in Routine ID ${routineId}`
+            })
+        }
+    
     } catch(error) {
         console.log("There was an error adding an activity to a routine.");
         next(error);
