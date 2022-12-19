@@ -1,16 +1,19 @@
 const express = require('express');
+const jwt = require('jsonwebtoken');
+const { JWT_SECRET } = process.env;
 const router = express.Router();
 const {
     getAllPublicRoutines,
+    getRoutineById,
     createRoutine,
     updateRoutine,
     destroyRoutine,
-    addActivityToRoutine
+    addActivityToRoutine,
+    getRoutineActivitiesByRoutine
 } = require('../db')
 
 // GET /api/routines
-//NOTE - Return a list of public routines, include the activities with them
-router.get('/routines', async(req, res, next) => {
+router.get('/', async(req, res, next) => {
     try {
         const publicRoutines = await getAllPublicRoutines()
         res.send(publicRoutines)
@@ -21,16 +24,26 @@ router.get('/routines', async(req, res, next) => {
 });
 
 // POST /api/routines
-//NOTE Create a new routine
-router.post('/routines', async(req, res, next) => {
+router.post('/', async(req, res, next) => {
     try {
-        const {name, goal, isPublic, creatorId} = req.body;
-        const newRoutine = await createRoutine({
-            name, 
-            goal,
-            isPublic, 
-            creatorId
-        });
+        const auth = req.header('Authorization')
+        if (!auth) {
+            res.status(401)
+            next({
+                name: "AuthorizationError",
+                message: "You must be logged in to perform this action"
+            })
+        }
+        const token = auth.slice(7)
+        const { id }  = jwt.verify(token, JWT_SECRET)
+        if (!id) {
+            next({
+                name: "AuthorizationError",
+                message: "You must be logged in to perform this action"
+            })
+        }
+        const {name, goal, isPublic} = req.body;
+        const newRoutine = await createRoutine({creatorId: id, name: name, goal: goal, isPublic: isPublic});
         res.send(newRoutine);
     } catch(error) {
         console.log("There was an error creating a new routine.");
@@ -39,10 +52,33 @@ router.post('/routines', async(req, res, next) => {
 });
 
 // PATCH /api/routines/:routineId
-//NOTE - Update a routine, notably change public/private, the name, or the goal
-router.patch('/routines/:routineId', async(req, res, next) => {
+router.patch('/:routineId', async(req, res, next) => {
     try {
+        const auth = req.header('Authorization')
+        if (!auth) {
+            res.status(401)
+            next({
+                name: "You are not logged in",
+                message: "You must be logged in to perform this action"
+            })
+        }
+        const token = auth.slice(7)
+        const {id, username} = jwt.verify(token, JWT_SECRET)
+        if (!username) {
+            next({
+                name: "You are not logged in",
+                message: "You must be logged in to perform this action"
+            })
+        }
+        console.log("Updating a routine")
         const {routineId} = req.params;
+        const verifyRoutine = await getRoutineById(routineId);
+        if (verifyRoutine.creatorId != id) {
+            next({
+                name: `User ${username} is not allowed to update ${verifyRoutine.name}`,
+                message: `User ${username} is not allowed to update ${verifyRoutine.name}`
+            })
+        }
         const {name, goal, isPublic} = req.body;
         const updatedRoutine = await updateRoutine({id: routineId, name, goal, isPublic});
         res.send(updatedRoutine);
@@ -54,11 +90,33 @@ router.patch('/routines/:routineId', async(req, res, next) => {
 
 // DELETE /api/routines/:routineId
 //NOTE - Hard delete a routine. Make sure to delete all the routineActivities whose routine is the one being deleted.
-router.delete('/routines/:routineId', async(req, res, next) => {
+router.delete('/:routineId', async(req, res, next) => {
     try {
+        // returns a 403 when the user deletes a routine that isn't theirs
+        const auth = req.header('Authorization')
+        if(!auth) {
+            res.status(403)
+            next({
+                name:'AuthorizationError',
+                message:'You are not authorized'
+            })
+        }
+        const token = auth.slice(7)
+
+        const {id, username} = jwt.verify(token, JWT_SECRET)
         const {routineId} = req.params;
-        console.log("routineId", routineId)
+
+        const routine = await getRoutineById(routineId)
+
+        if(routine.creatorId !== id) {
+            res.status(403)
+            next({
+                name:'AuthorizationError',
+                message:'You are not authorized'
+            })
+        }
         const deletedRoutine = await destroyRoutine(routineId);
+        console.log("deletedRoutine", deletedRoutine);
         res.send(deletedRoutine);
     } catch(error) {
         console.log("There was an error deleting a routine.");
@@ -67,12 +125,29 @@ router.delete('/routines/:routineId', async(req, res, next) => {
 });
 
 // POST /api/routines/:routineId/activities
-//NOTE - Attach a single activity to a routine. Prevent duplication on (routineId, activityId) pair.
-router.post('/routines/:routineId/activities', async(req, res, next) => {
+//NOTE - Attach a single activity to a routine. 
+// Prevent duplication on (routineId, activityId) pair.
+router.post('/:routineId/activities', async(req, res, next) => {
     try {
         const {routineId} = req.params;
+        const existingRoutineActivities = await getRoutineActivitiesByRoutine(routineId);
+        console.log("routineId", routineId);
+
         const {activityId, count, duration} = req.body;
-        const newRoutineActivity = await addActivityToRoutine({routineId, activityId, count, duration})
+        console.log("activityId", activityId);
+
+        if (existingRoutineActivities.activityId == activityId) {
+            next({
+                name: `Activity ID ${activityId} already exists in Routine ID ${routineId}`,
+                message: `Activity ID ${activityId} already exists in Routine ID ${routineId}`
+            })
+        }
+        const newRoutineActivity = await addActivityToRoutine({
+            routineId: routineId, 
+            activityId: activityId, 
+            count: count, 
+            duration: duration
+        })
         res.send(newRoutineActivity);
     } catch(error) {
         console.log("There was an error adding an activity to a routine.");
