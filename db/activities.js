@@ -1,4 +1,5 @@
 
+const { set } = require("../app");
 const client = require("./client");
 
 // database functions
@@ -27,7 +28,7 @@ async function getActivityById(id) {
     );
 
     if (!activities) {
-      return null;
+      return undefined;
     }
 
     return activities;
@@ -51,7 +52,6 @@ async function getActivityByName(name) {
     );
     //return await Promise.all(activitiesIds.map(
     //  activities => getActivityById(activity.id)));
-    console.log("Act here", activitiesIds);
     return activitiesIds;
   } catch (error) {
     throw error;
@@ -117,21 +117,23 @@ async function createActivity({ name, description }) {
 // do update the name and description
 // return the updated activity
 async function updateActivity({ id, ...fields }) {
-
   const descArray = Object.keys(fields)
-  let beforeString = descArray.map((key,index) => `${key}=$${index+1}`)
-  let [setString] = beforeString
+  let beforeString = descArray.map((key,index) => `${key}=$${index+2}`)
+  let setString = beforeString.join(', ')
   
   try {
     const {rows: [activity] } = await client.query(`
     UPDATE activities
     SET ${setString}
-    WHERE id=$2
+    WHERE id=$1
     RETURNING *;
-    `, [...Object.values(fields), id])
+    `, [id, ...Object.values(fields),])
+   
     return activity
+    
   }
   catch(error) {
+    console.log(error)
     throw error
   }
 }

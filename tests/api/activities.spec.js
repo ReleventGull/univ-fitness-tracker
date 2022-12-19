@@ -110,7 +110,7 @@ describe("/api/activities", () => {
 
     it("returns an error when updating an activity that does not exist", async () => {
       const { token } = await createFakeUserWithToken("Barry")
-
+      
       const newActivityData = {
         name: "Run laps",
         description: "Run 3 laps",
