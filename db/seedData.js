@@ -2,6 +2,24 @@
 // const { } = require('./');
 const client = require("./client");
 
+const { 
+  createUser,
+} = require("./users");
+
+const {
+  getAllActivities,
+  createActivity,
+} = require("./activities");
+
+const {
+  getRoutinesWithoutActivities,
+  createRoutine,
+} = require("./routines");
+
+const {
+  addActivityToRoutine
+} = require("./routine_activities");
+
 async function dropTables() {
   try {
     console.log("Starting to drop tables...");
