@@ -4,17 +4,12 @@ const { getRoutineActivityById, updateRoutineActivity, destroyRoutineActivity } 
 const { requireUser } = require('./missinguser');
 
 
-// PATCH /api/routine_activities/:routineActivityId
-//routine_activities = posts
-//routineActivityId = Id
-//tags
-
 router.patch('/:routineActivityId', requireUser, async (req, res, next) => {
 
     const { routineActivityId } = req.params;
     //const { title, content, tags } = req.body;
     const { count, duration } = req.body;
-  
+    
     const updateCount = {};
   
     if (count) {
