@@ -6,10 +6,11 @@
   "scripts": {
     "seed:dev": "nodemon ./db/seed.js",
     "seed": "node ./db/seed.js",
-    "start:dev": "nodemon server.js",
-    "start": "node server.js",
+    "server:dev": "nodemon server.js",
+    "server": "node server.js",
     "test": "jest --runInBand",
-    "test:watch": "jest --runInBand --watchAll"
+    "test:watch": "jest --runInBand --watchAll",
+    "client:dev": "react-scripts start"
   },
   "repository": {
     "type": "git",
@@ -27,7 +28,6 @@
   "bugs": {
     "url": "https://github.com/wallacepreston/fitnesstrackr/issues"
   },
-  "homepage": "https://github.com/wallacepreston/fitnesstrackr#readme",
   "devDependencies": {
     "eslint": "^8.2.0",
     "eslint-plugin-jest": "^25.2.4",
@@ -45,6 +45,21 @@
     "jest": "^26.0.1",
     "jsonwebtoken": "^8.5.1",
     "morgan": "^1.10.0",
-    "pg": "^8.2.1"
+    "pg": "^8.2.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "^5.0.1"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }

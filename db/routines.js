@@ -196,6 +196,7 @@ return routineWithname
 }
 
 async function updateRoutine({id, ...fields}) {
+  
   try {
     if (!Object.values(fields)) {
       return false
@@ -238,7 +239,7 @@ async function destroyRoutine(id) {
     WHERE id=$1
     RETURNING *;
     `,[id])
-    return {routineActvitiy: destroyedRoutineActivities , routine: destroyedRoutine};
+    return destroyedRoutine;
   }catch(error) {
     console.log("There was an error trying to destroy the routine")
     throw error

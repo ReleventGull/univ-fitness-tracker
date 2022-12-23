@@ -100,7 +100,7 @@ describe("DB Routine Activities", () => {
 
       expect(updatedRoutineActivity.id).toBe(
         fakeRoutineActivity.id
-      )
+      ) 
       expect(updatedRoutineActivity.count).toBe(
         newRoutineActivityData.count
       )
