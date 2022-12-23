@@ -36,7 +36,7 @@ async function addActivityToRoutine({
 
 async function getRoutineActivitiesByRoutine({id}) {
 try {
-const {rows: [routine_activities]} = await client.query(`
+const {rows: routine_activities} = await client.query(`
 SELECT * FROM routine_activities
 WHERE "routineId"=${id}
 `)
