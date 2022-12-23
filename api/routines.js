@@ -1,3 +1,4 @@
+const e = require('express');
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = process.env;
@@ -105,22 +106,28 @@ router.delete('/:routineId', async(req, res, next) => {
             })
         }
         const token = auth.slice(7)
-
         const {id, username} = jwt.verify(token, JWT_SECRET)
-        const {routineId} = req.params;
+        const {routineId} = req.params
+        
+        const routineToDelete = await getRoutineById(routineId)
 
-        const routine = await getRoutineById(routineId)
-
-        if(routine.creatorId !== id) {
-            next({
-                name:'AuthorizationError',
-                message:'You are not authorized'
+        if(routineToDelete.creatorId !== id) {
+           
+            next({ 
+                name: "Not valid",
+                message: "You are not authorized to do this."
             })
-        }
-   
-    const deletedRoutine = await destroyRoutine(routineId);
+        }else {
+            
+            const deletedRoutine = await destroyRoutine(routineId)
 
-    res.send(deletedRoutine);
+            res.send(deletedRoutine)
+        }
+        
+        
+       
+    
+    
     } catch(error) {
         console.log("There was an error deleting a routine.");
         next(error);

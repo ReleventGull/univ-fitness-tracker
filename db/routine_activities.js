@@ -48,7 +48,8 @@ return routine_activities
 }
 
 async function updateRoutineActivity ({id, ...fields}) {
-  console.log("I WAS CALLED")
+  console.log("I WAS CALLED", fields)
+
   let keysArray = Object.keys(fields)
 
   let beforeString = keysArray.map((key, index) => `${key}=$${index+2}`)
