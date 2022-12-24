@@ -77,6 +77,7 @@ router.patch('/:routineId', async(req, res, next) => {
         const {routineId} = req.params;
         const verifyRoutine = await getRoutineById(routineId);
         if (verifyRoutine.creatorId != id) {
+            res.status(403).json({})
             next({
                 name: `User ${username} is not allowed to update ${verifyRoutine.name}`,
                 message: `User ${username} is not allowed to update ${verifyRoutine.name}`
@@ -140,31 +141,28 @@ router.delete('/:routineId', async(req, res, next) => {
 router.post('/:routineId/activities', async(req, res, next) => {
     try {
  
-      
-
         const {activityId, count, duration} = req.body;
         const {routineId} = req.params;
-        console.log('ROUTINE ID', routineId)
-        const routineActivitiyByRoutine = await getRoutineActivitiesByRoutine({id: routineId});
-        const routineActivityByActivitity = await getRoutineActivityById(activityId)
+       
+        const [routineActivitiyByRoutine] = await getRoutineActivitiesByRoutine({id: routineId});
         
-        
-        if (!routineActivitiyByRoutine && !routineActivityByActivitity) {
-            console.log('routineActivitiyByRoutine', routineActivitiyByRoutine)
-            const newRoutineActivity = await addActivityToRoutine({
-            routineId: routineId, 
-            activityId: activityId, 
-            count: count, 
-            duration: duration
-        })
-        res.send(newRoutineActivity);
-        
-    } else {
+        if (!routineActivitiyByRoutine) {
+            console.log('Activity routine', routineActivitiyByRoutine)
+            const newRoutineActivity = await addActivityToRoutine ({
+                routineId: routineId,
+                activityId: activityId,
+                count: count,
+                duration: duration
+            })
+            console.log('Activity routine', newRoutineActivity)
+            res.send(newRoutineActivity)
+        }else {
             next({
                 name: `Activity ID ${activityId} already exists in Routine ID ${routineId}`,
                 message: `Activity ID ${activityId} already exists in Routine ID ${routineId}`
             })
         }
+        
     
     } catch(error) {
         console.log("There was an error adding an activity to a routine.");
