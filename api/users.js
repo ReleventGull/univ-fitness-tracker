@@ -48,6 +48,7 @@ router.post('/register', async (req, res, next) => {
                 message: `User ${username} is already taken.`,
               });
         }
+        console.log(password)
         if(password.length < 8) {
             next({
                 name:`Password Too Short!`,
