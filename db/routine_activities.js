@@ -48,7 +48,7 @@ return routine_activities
 }
 
 async function updateRoutineActivity ({id, ...fields}) {
-  console.log("I WAS CALLED", fields)
+  console.log("I WAS CALLED", id)
 
   let keysArray = Object.keys(fields)
 
@@ -56,7 +56,7 @@ async function updateRoutineActivity ({id, ...fields}) {
   
   let setString = beforeString.join(', ')
   
- 
+  console.log('Keys', setString)
   try {
     const {rows: [updatedRoutineActivity]} = await client.query(`
     UPDATE routine_activities
@@ -64,7 +64,7 @@ async function updateRoutineActivity ({id, ...fields}) {
     WHERE id=$1
     RETURNING *;
     `, [id, ...Object.values(fields)])
-  
+  console.log(updatedRoutineActivity)
     return updatedRoutineActivity
   }catch(error) {
     console.log("There was an error updating Rouing Activity")

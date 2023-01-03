@@ -32,12 +32,12 @@ async function getUser({ username, password }) {
       WHERE username=$1;
     `, [username]);
    
-   
-    let passwordsMatch = await bcrypt.compare(password, user.password)
-
     if (!user) {
       throw new Error("Username incorrect, please try again.");
     }
+    
+    let passwordsMatch = await bcrypt.compare(password, user.password)
+  
     if (!passwordsMatch) {
       return false
      }

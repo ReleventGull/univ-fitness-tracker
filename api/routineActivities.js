@@ -27,14 +27,22 @@ router.patch('/:routineActivityId', async (req, res, next) => {
     const { routineActivityId } = req.params;
     const { count, duration } = req.body;
     const routineActivityToEdit = await getRoutineActivityById(routineActivityId)
+    console.log('bruh', routineActivityToEdit)
     const routineCheckId = await getRoutineById(routineActivityToEdit.routineId)
     if(id === routineCheckId.creatorId) {
-     
+     const {routineActivityId} = req.params
       let updateObject = {}
-      updateObject.id = id
-      updateObject.count = count
-      updateObject.duration = duration
+      updateObject.id = routineActivityId
+      
+      if (count) {
+        updateObject.count = count
+      }
+      if(duration) {
+        updateObject.duration = duration
+      }
+      console.log('Yo im here', updateObject)
       const updatedRoutineActivity = await updateRoutineActivity(updateObject)
+      console.log("UPDATED HERE", updatedRoutineActivity)
       res.send(updatedRoutineActivity)
     }else {
       next({
@@ -72,7 +80,7 @@ router.delete('/:routineActivityId', async (req, res, next) => {
     const routine = await getRoutineById(gettingRA.routineId)
      
     if(_user.id != routine.creatorId) {
-       res.send(res.status(403))
+       
       next({
         name: `User ${username} is not allowed to delete ${routine.name}`,
          message: `User ${username} is not allowed to delete ${routine.name}`
