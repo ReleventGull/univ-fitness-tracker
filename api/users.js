@@ -16,7 +16,7 @@ const {
 router.post('/login', async (req, res, next) => {
     try {
         const { username, password } = req.body;
-        
+        console.log(password)
         const user = await getUser({ username: username, password:password});
 
         if (user) {

@@ -1,5 +1,4 @@
 
-const { set } = require("../app");
 const client = require("./client");
 
 // database functions

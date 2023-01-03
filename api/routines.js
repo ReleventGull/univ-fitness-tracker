@@ -1,4 +1,4 @@
-const e = require('express');
+
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = process.env;
@@ -140,27 +140,54 @@ router.delete('/:routineId', async(req, res, next) => {
 // Prevent duplication on (routineId, activityId) pair.
 router.post('/:routineId/activities', async(req, res, next) => {
     try {
- 
+        const auth = req.header('Authorization')
+        if (!auth) {
+            res.status(401)
+            next({
+                name: "You are not logged in",
+                message: "You must be logged in to perform this action"
+            })
+        }
+        const token = auth.slice(7)
+        const {id, username} = jwt.verify(token, JWT_SECRET)
+        if (!username) {
+            next({
+                name: "You are not logged in",
+                message: "You must be logged in to perform this action"
+            })
+        }
+        
         const {activityId, count, duration} = req.body;
         const {routineId} = req.params;
        
         const [routineActivitiyByRoutine] = await getRoutineActivitiesByRoutine({id: routineId});
-        
-        if (!routineActivitiyByRoutine) {
-            console.log('Activity routine', routineActivitiyByRoutine)
+       
+        if(!routineActivitiyByRoutine) {
             const newRoutineActivity = await addActivityToRoutine ({
                 routineId: routineId,
                 activityId: activityId,
                 count: count,
                 duration: duration
             })
-            console.log('Activity routine', newRoutineActivity)
             res.send(newRoutineActivity)
-        }else {
+        }
+        
+        console.log(routineActivitiyByRoutine.activityId, activityId)
+        if (routineActivitiyByRoutine.activityId == activityId) {
+            console.log("They're equal lol")
             next({
                 name: `Activity ID ${activityId} already exists in Routine ID ${routineId}`,
                 message: `Activity ID ${activityId} already exists in Routine ID ${routineId}`
             })
+        }else {
+            
+            const newRoutineActivity = await addActivityToRoutine ({
+            routineId: routineId,
+            activityId: activityId,
+            count: count,
+            duration: duration
+        })
+        res.send(newRoutineActivity)
         }
         
     
