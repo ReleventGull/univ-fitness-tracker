@@ -24,11 +24,6 @@ app.use('/api', router)
 
 
 
-
-app.use((req,res,next) => {
-    res.status(401)
-    res.send("You must be logged in to perform this action")
-})
 app.use((error, req, res, next) => {
     res.status(500)
     res.send({
